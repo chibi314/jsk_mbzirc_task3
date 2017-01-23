@@ -25,9 +25,9 @@ class Serial_board:
         #if not (self.ser._isOpen()):
          #   rospy.ROSException("Cant open port %s" % self.baud)
         #magnets service server
-        self._srv_magnet = rospy.Service("/serial_board/magnet_control", Magnet, self.__Magnet_Service)
+        self._srv_magnet = rospy.Service("serial_board/magnet_control", Magnet, self.__Magnet_Service)
         #magnets switch publisher
-        self._pub_magnet = rospy.Publisher("/serial_board/magnet_feedback", Int16, queue_size = 1)
+        self._pub_magnet = rospy.Publisher("serial_board/magnet_feedback", Int16, queue_size = 1)
 
     #delete function
     def __del__(self):
