@@ -9,6 +9,7 @@
   <arg name="LOCAL_IP" default="192.168.97.31"/> <!-- UAV -->
   <arg name="REMOTE_IP" default="192.168.97.188"/> <!-- Remote PC -->
    <!-- lati and longi for the box -->
+
   <arg name="origin_latitude" default="24.643701"/>
   <arg name="origin_longitude" default="54.756211"/>
   <!-- drone number -->
