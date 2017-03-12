@@ -243,7 +243,7 @@ public:
         double uav_h;
         if(odom.pose.pose.position.z<1.5&&ultra_sonic.ranges.size()&&ultra_sonic.ranges.at(0)>0.05) //less than 1 meter
             uav_h = ultra_sonic.ranges.at(0) - 0.05 ;
-        else if(odom.pose.pose.position.z<1&&lidar_data>0&&lidar_data<2) //less than 1 meter
+        else if(odom.pose.pose.position.z<3&&lidar_data>0&&lidar_data<3) //less than 1 meter
             uav_h = lidar_data;
         else
 	  uav_h = odom.pose.pose.position.z;
