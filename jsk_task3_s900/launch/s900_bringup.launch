@@ -1,6 +1,6 @@
 <!-- -*- mode: xml -*- -->
 <launch>
-  <arg name="LOCAL_IP" default="192.168.97.32"/> <!-- UAV -->
+  <arg name="LOCAL_IP" default="192.168.97.33"/> <!-- UAV -->
   <arg name="REMOTE_IP" default="192.168.97.177"/> <!-- Remote PC -->
 
   <!-- Base Platform -->
@@ -19,7 +19,7 @@
 
   <!-- Communication -->
   <include file="$(find jsk_task3_m100)/launch/jsk_task3_v.launch" >
-    <arg name="drone_number" value="2.0"/>
+    <arg name="drone_number" value="3.0"/>
     <arg name="LOCAL_IP" value="$(arg LOCAL_IP)"/>
     <arg name="REMOTE_IP" value="$(arg REMOTE_IP)"/>
     <arg name="gimbal" value="false"/>
