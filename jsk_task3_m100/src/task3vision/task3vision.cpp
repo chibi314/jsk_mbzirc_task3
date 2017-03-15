@@ -89,7 +89,7 @@ private:
     std::vector<std::vector<cv::Point> > clusters;
 #define HSVRED -10
 #define HSVGREEN 60 //because our color is more like blue....lol
-#define HSVBLUE 130
+#define HSVBLUE 120
 #define HSVYELLOW 30
 #define HSVORANGE 20
     //functor
@@ -111,8 +111,8 @@ public:
     {
         priv_nh = new ros::NodeHandle("~");
         std::string image_topic, cam_info_topic;
-        priv_nh->param("image_topic", image_topic, std::string("/image_zenmus"));
-        priv_nh->param("cam_info_topic", cam_info_topic, std::string("/dji_sdk/camera_info"));
+        priv_nh->param("image_topic", image_topic, std::string("/camera/image_rect"));
+        priv_nh->param("cam_info_topic", cam_info_topic, std::string("/camera/fisheye_gimbal/camera_info"));
 
         img_sub_  = new message_filters::Subscriber<sensor_msgs::Image>(nh_,image_topic,1);
         camera_info_sub_ = new message_filters::Subscriber<sensor_msgs::CameraInfo>(nh_,cam_info_topic, 1);
@@ -407,7 +407,7 @@ void task3_vision::ImageCallback(const sensor_msgs::ImageConstPtr& img,
     {
         cv::Mat raw_image = cv_bridge::toCvCopy(img,"bgr8")->image;
         cv::Mat hsv_image;
-        cv::Mat hsv_filtered_r, hsv_filtered_g, hsv_filtered_b, hsv_filtered_ye, hsv_filtered_or, hsv_filtered_all;
+        cv::Mat hsv_filtered_r, hsv_filtered_g, hsv_filtered_b, hsv_filtered_ye, hsv_filtered_or, hsv_filtered_all, dst_img;
         //assign the dist threshold by considering the height...
         cluster_thre_dist = 50 / (fake_dist+0.1);
         cluster_thre_dist = 50 / (uav_h + 0.1);
@@ -416,10 +416,11 @@ void task3_vision::ImageCallback(const sensor_msgs::ImageConstPtr& img,
         std::clock_t start;
         double duration;
         start = std::clock();
-
         /**********first HSI Filter**********/
         {
-            cv::cvtColor(raw_image,hsv_image,cv::COLOR_BGR2HSV);
+	  cv::GaussianBlur(raw_image, dst_img, cv::Size(19,15), 8,6);
+            cv::cvtColor(dst_img, hsv_image,cv::COLOR_BGR2HSV);
+	    //	    cv::imshow("test", dst_img);
             cv::Mat hsv_r_down;
             //r
             cv::inRange(hsv_image, cv::Scalar(180+HSVRED-r_off, s_min, v_min, 0), cv::Scalar(180, s_max, v_max, 0), hsv_filtered_r);
@@ -430,12 +431,12 @@ void task3_vision::ImageCallback(const sensor_msgs::ImageConstPtr& img,
             //b
             cv::inRange(hsv_image, cv::Scalar(HSVBLUE-b_off, s_min, v_min, 0), cv::Scalar(HSVBLUE+b_off, s_max, v_max, 0), hsv_filtered_b);
             //ye
-            cv::inRange(hsv_image, cv::Scalar(HSVYELLOW-ye_off, s_min, v_min, 0), cv::Scalar(HSVYELLOW+ye_off, s_max, v_max, 0), hsv_filtered_ye);
+            cv::inRange(hsv_image, cv::Scalar(HSVYELLOW-ye_off, 20, 20, 0), cv::Scalar(HSVYELLOW+ye_off, 118, 118, 0), hsv_filtered_ye);
             //or
             cv::inRange(hsv_image, cv::Scalar(HSVORANGE-or_off, s_min, v_min, 0), cv::Scalar(HSVORANGE+or_off, s_max, v_max, 0), hsv_filtered_or);
         }
         //show image of r g b ye or
-        hsv_filtered_all = hsv_filtered_r | hsv_filtered_g | hsv_filtered_b |  hsv_filtered_ye |  hsv_filtered_or;
+	hsv_filtered_all = hsv_filtered_r | hsv_filtered_g | hsv_filtered_b |  hsv_filtered_ye |  hsv_filtered_or;
 
         if(debug_show)
         {
@@ -461,9 +462,12 @@ void task3_vision::ImageCallback(const sensor_msgs::ImageConstPtr& img,
          * 3: Findcontours
          * 4: Hough Circle Transform
          ***/
-        int ptr_all = cv::countNonZero(hsv_filtered_r) + cv::countNonZero(hsv_filtered_g)
-                + cv::countNonZero(hsv_filtered_b) + cv::countNonZero(hsv_filtered_ye)
-                + cv::countNonZero(hsv_filtered_or);
+	//        int ptr_all = cv::countNonZero(hsv_filtered_r) + cv::countNonZero(hsv_filtered_g)
+	//                + cv::countNonZero(hsv_filtered_b) + cv::countNonZero(hsv_filtered_ye)
+	//      + cv::countNonZero(hsv_filtered_or);
+
+        int ptr_all = cv::countNonZero(hsv_filtered_r) + cv::countNonZero(hsv_filtered_g) +
+                cv::countNonZero(hsv_filtered_b) + cv::countNonZero(hsv_filtered_ye);
         //n_ds is the downsample factor
         int n_ds = ptr_all/downsample_cluster_size + 1; //begin from  1
         if(debug_show)
@@ -481,7 +485,7 @@ void task3_vision::ImageCallback(const sensor_msgs::ImageConstPtr& img,
         {
             this->clusters = this->EuclideanCluster(&hsv_filtered_r, &lbl, n_ds, 'r');
             this->EuclideanCluster(&hsv_filtered_g, &lbl, n_ds, 'g');
-            this->EuclideanCluster(&hsv_filtered_b, &lbl, n_ds, 'b');
+	    this->EuclideanCluster(&hsv_filtered_b, &lbl, n_ds, 'b');
             //because of the color of background, no orange..
 
             this->EuclideanCluster(&hsv_filtered_ye, &lbl, n_ds, 'y');
