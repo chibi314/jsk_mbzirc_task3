@@ -349,7 +349,7 @@ public:
        }
        else
        {
-           holdup_height = 0.55;
+           holdup_height = 0.50;
        }
 
        //obtain control and take off counter

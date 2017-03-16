@@ -15,11 +15,11 @@
   <arg name="raw_image" default="/image_zenmus"/>
 
   <!-- DJI SDK -->
-  <include file="$(find jsk_task3_m100)/launch/jsk_udp.launch" >
+  <!--include file="$(find jsk_task3_m100)/launch/jsk_udp.launch" >
          <arg name="LOCAL_IP" value="$(arg LOCAL_IP)"/>
          <arg name="REMOTE_IP" value="$(arg REMOTE_IP)"/>
          <arg name="raw_image" value="$(arg raw_image)" />
-  </include>
+  </include-->
  <!-- Magnet -->
   <include file="$(find jsk_mbzirc_board)/launch/magnet.launch">
       <arg name="verbose" value="false" />
